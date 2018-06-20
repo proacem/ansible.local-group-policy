@@ -1,0 +1,6 @@
+---
+# tasks file for sbaerlocher.local-group-policy
+
+- name: Message
+  debug:
+    msg: "Your {{ ansible_system }} is not supported"
