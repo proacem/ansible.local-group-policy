@@ -9,7 +9,8 @@
   tags:
     - configuration
 
-- set_fact:
+- name: Set fact for temporary path
+  set_fact:
     local_group_policy_temporary: "{{ register_local_group_policy_temporary.path }}"
   tags:
     - configuration
