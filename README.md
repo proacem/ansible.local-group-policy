@@ -21,7 +21,7 @@ None
 | Variable             | Default     | Comments (type)                                   |
 | :---                 | :---        | :---                                              |
 | local_group_policy_repo | `https://github.com/sbaerlocher/windows.local-group-policy.git` | |
-| local_group_policy_directory | C:\Windows\System32 | |
+| local_group_policy_directory | C:\\Windows\\System32\\ | |
 
 ## Dependencies
 
