@@ -1,38 +1,44 @@
 ---
 # tasks file for sbaerlocher.local-group-policy
 
-- name: add OS specific variables
-  include_vars: "{{ loop_vars }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_distribution }}.yml"
-        - "{{ ansible_os_family }}.yml"
-        - "{{ ansible_system }}.yml"
-        - "defaults.yml"
-      paths:
-        - "vars"
-  loop_control:
-    loop_var: loop_vars
+- name: Create temporary directory for GroupPolicy
+  tempfile:
+    state: directory
+  register: register_local_group_policy_temporary
+  delegate_to: 127.0.0.1
   tags:
     - configuration
-    - packages
 
-- name: include distribution tasks
-  include_tasks: "{{ loop_distribution }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_distribution }}.yml"
-        - "{{ ansible_os_family }}.yml"
-        - "{{ ansible_system }}.yml"
-        - "defaults.yml"
-      paths:
-        - "distribution"
-  loop_control:
-    loop_var: loop_distribution
+- set_fact:
+    local_group_policy_temporary: "{{ register_local_group_policy_temporary.path }}"
   tags:
     - configuration
-    - packages
+
+- name: Git clone GroupPolicy
+  git:
+    repo: "{{ local_group_policy_repo }}"
+    dest: "{{ local_group_policy_temporary }}"
+    version: "{{ local_group_policy_branch | default('master') }}"
+  delegate_to: 127.0.0.1
+  tags:
+    - configuration
+
+- name: Copy GroupPolicy directory
+  win_copy:
+    src: "{{ local_group_policy_temporary }}"
+    dest: "{{ local_group_policy_directory }}"
+  tags:
+    - configuration
+
+- name: Remove temporary directory for GroupPolicy
+  file:
+    path: "{{ local_group_policy_temporary }}"
+    state: absent
+  delegate_to: 127.0.0.1
+  tags:
+    - configuration
+
+- name: Update GroupPolicy
+  win_shell: gpupdate /force
+  tags:
+    - configuration
