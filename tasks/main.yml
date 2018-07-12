@@ -12,13 +12,14 @@
 - name: Set fact for temporary path
   set_fact:
     local_group_policy_temporary: "{{ register_local_group_policy_temporary.path }}"
+    local_group_policy_temporary_grouppolicy: "{{ register_local_group_policy_temporary.path }}/GroupPolicy"
   tags:
     - configuration
 
 - name: Git clone GroupPolicy
   git:
     repo: "{{ local_group_policy_repo }}"
-    dest: "{{ local_group_policy_temporary }}"
+    dest: "{{ local_group_policy_temporary_grouppolicy }}"
     version: "{{ local_group_policy_branch | default('master') }}"
   delegate_to: 127.0.0.1
   tags:
@@ -26,14 +27,14 @@
 
 - name: Copy GroupPolicy directory
   win_copy:
-    src: "{{ local_group_policy_temporary }}"
+    src: "{{ local_group_policy_temporary_grouppolicy }}"
     dest: "{{ local_group_policy_directory }}"
   tags:
     - configuration
 
 - name: Remove temporary directory for GroupPolicy
   file:
-    path: "{{ local_group_policy_temporary }}"
+    path: "{{local_group_policy_temporary }}"
     state: absent
   delegate_to: 127.0.0.1
   tags:
